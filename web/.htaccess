@@ -1,0 +1,99 @@
+# ============================================
+# UniSmart Pay - Configuration Apache (.htaccess)
+# ============================================
+
+# Activer rewrite engine
+RewriteEngine On
+
+# Rediriger vers index.php dans web/
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php?path=$1 [L,QSA]
+
+# ============================================
+# Sécurité: Empêcher accès directs aux fichiers sensibles
+# ============================================
+
+# Bloquer accès à config.php
+<FilesMatch "^config\.php$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Bloquer accès aux fichiers .sql
+<FilesMatch "\.sql$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Bloquer accès aux répertoires
+<FilesMatch "^\.">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# ============================================
+# Performance: Compression et cache
+# ============================================
+
+# Gzip compression
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript
+</IfModule>
+
+# Cache navigateur
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresDefault "access plus 1 day"
+    
+    # Images
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    
+    # CSS
+    ExpiresByType text/css "access plus 1 year"
+    
+    # JavaScript
+    ExpiresByType application/javascript "access plus 1 year"
+</IfModule>
+
+# ============================================
+# Headers de sécurité
+# ============================================
+
+<IfModule mod_headers.c>
+    # Empêcher clickjacking
+    Header always append X-Frame-Options "SAMEORIGIN"
+    
+    # Empêcher MIME sniffing
+    Header set X-Content-Type-Options "nosniff"
+    
+    # XSS Protection
+    Header set X-XSS-Protection "1; mode=block"
+    
+    # HSTS (si HTTPS)
+    # Header set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    
+    # Content Security Policy
+    Header set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';"
+</IfModule>
+
+# ============================================
+# Force HTTPS (décommenter si certificat SSL)
+# ============================================
+
+# RewriteCond %{HTTPS} off
+# RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# ============================================
+# Gérer les erreurs
+# ============================================
+
+ErrorDocument 404 "Page non trouvée"
+ErrorDocument 500 "Erreur serveur"
+ErrorDocument 403 "Accès interdit"
+
+# ============================================
+# Fin configuration
+# ============================================

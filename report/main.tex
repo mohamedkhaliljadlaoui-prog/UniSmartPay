@@ -1,0 +1,942 @@
+% !TeX program = pdflatex
+\documentclass[12pt,a4paper]{report}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{geometry}
+\geometry{margin=2.4cm}
+
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{fancyhdr}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{longtable}
+\usepackage{ifthen}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue,
+  urlcolor=blue,
+  citecolor=blue
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{UniSmartPay}
+\rhead{Rapport final}
+\cfoot{\thepage}
+
+\setlist[itemize]{topsep=4pt,itemsep=2pt}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  frame=single,
+  rulecolor=\color{black!15},
+  backgroundcolor=\color{black!2},
+  keywordstyle=\color{blue!60!black},
+  commentstyle=\color{green!40!black},
+  stringstyle=\color{red!50!black}
+}
+
+\setlength{\parskip}{4pt}
+\setlength{\parindent}{0pt}
+
+% ====== À REMPLIR PAR VOUS ======
+\newcommand{\ProjectTitle}{UniSmartPay — Système de paiement universitaire avec la carte etudiant  RFID + code-barres}
+\newcommand{\GroupClass}{\textit{(Classe à compléter)}}
+\newcommand{\MemberA}{Ele Miskini}
+\newcommand{\MemberB}{Mohamed Khalil Jadlaoui}
+\newcommand{\MemberC}{Jallel Fayech}
+\newcommand{\MemberD}{Fourat Andolsi}
+\newcommand{\MemberE}{Ahmed Smaili}
+\newcommand{\GitHubURL}{\url{https://github.com/ORG/REPO}}
+\newcommand{\UniversityHeaderA}{REPUBLIQUE TUNISIENNE}
+\newcommand{\UniversityHeaderB}{MINISTERE DE L’ENSEIGNEMENT SUPERIEUR\\ET DE LA RECHERCHE SCIENTIFIQUE}
+\newcommand{\UniversityHeaderC}{UNIVERSITE TUNIS EL MANAR}
+\newcommand{\FacultyLine}{FACULTE DES SCIENCES DE TUNIS}
+\newcommand{\DepartmentLine}{DEPARTEMENT DES SCIENCES DE L’INFORMATIQUE}
+\newcommand{\ReportType}{RAPPORT DE\\PROJET FEDERE iot 2 Lce2}
+\newcommand{\Supervisor}{\textit{(Encadrant à compléter)}}
+\newcommand{\HostOrg}{\textit{(Organisme d’accueil à compléter)}}
+\newcommand{\AcademicYear}{2025/2026}
+
+% ====== Helper: safe includegraphics (compile even if file missing) ======
+% Usage: \SmartFigure{figures/file.png}{0.9\linewidth}
+\newcommand{\SmartFigure}[2]{%
+  \IfFileExists{#1}{\includegraphics[width=#2]{#1}}{%
+    \fbox{\begin{minipage}[c][0.22\textheight][c]{#2}
+      \centering\small\textit{Image manquante}\\
+      \texttt{#1}\\
+      \vspace{4pt}
+      Déposez l'image dans \texttt{report/figures/}
+    \end{minipage}}%
+  }%
+}
+
+\begin{document}
+
+% ================= PAGE DE GARDE =================
+\begin{titlepage}
+  \centering
+
+  % Logos (déposez les fichiers dans report/figures/)
+  \begin{minipage}{0.49\textwidth}
+    \raggedright
+    \SmartFigure{figures/logo_fac.png}{0.35\linewidth}
+  \end{minipage}
+  \begin{minipage}{0.49\textwidth}
+    \raggedleft
+    \SmartFigure{figures/logofst.png}{0.35\linewidth}
+  \end{minipage}
+
+  \vspace{10pt}
+
+  {\small\bfseries \UniversityHeaderA\par}
+  \vspace{2pt}
+  {\small\bfseries \UniversityHeaderB\par}
+  \vspace{2pt}
+  {\small\bfseries \UniversityHeaderC\par}
+
+  \vspace{14pt}
+
+  {\small\bfseries \FacultyLine\par}
+  \vspace{2pt}
+  {\small\bfseries \DepartmentLine\par}
+
+  \vspace{18pt}
+
+  {\large\bfseries \ReportType\par}
+
+  \vspace{18pt}
+
+  \fbox{%
+    \begin{minipage}{0.86\textwidth}
+      \vspace{6pt}
+      \centering
+      {\bfseries TITRE :\par}
+      \vspace{6pt}
+      {\Large\bfseries \ProjectTitle\par}
+      \vspace{8pt}
+    \end{minipage}%
+  }
+
+  \vspace{18pt}
+
+  {\normalsize\bfseries Réalisé par :\par}
+  \vspace{8pt}
+  \begin{tabular}{p{0.45\textwidth} p{0.45\textwidth}}
+    \MemberA & \MemberB\\[6pt]
+    \MemberC & \MemberD\\[6pt]
+    \multicolumn{2}{c}{\MemberE}\\
+  \end{tabular}
+
+  \vspace{16pt}
+
+  \begin{tabular}{ll}
+    \textbf{Encadré par :} & \Supervisor\\[4pt]
+    \textbf{Organisme d’accueil :} & \HostOrg\\[4pt]
+    \textbf{Dépôt GitHub :} & \GitHubURL\\
+  \end{tabular}
+
+  \vfill
+  {\normalsize\bfseries Année Universitaire \AcademicYear\par}
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+% ================= 1. PRÉSENTATION =================
+\chapter{Introduction et contexte}
+\section{Contexte}
+Dans un environnement universitaire, les paiements à la buvette et au restaurant sont souvent gérés de manière manuelle (espèces, tickets papier), ce qui génère des files d’attente, des erreurs de caisse, et des difficultés de suivi.
+
+\section{Idée principale}
+L’idée principale est de rendre la \textbf{carte étudiante “smart”} : elle devient une clé d’accès à un compte prépayé (solde consultable, rechargeable et traçable) pour payer rapidement sur le campus.
+
+Le projet propose ensuite un paiement rapide et traçable :
+\begin{itemize}
+  \item \textbf{Buvette :} scan de produits (code-barres) \(\rightarrow\) création d’une commande \textit{en attente} \(\rightarrow\) paiement avec carte RFID via terminal ESP32.
+  \item \textbf{Restaurant :} débit d’un \textbf{ticket fixe} via carte RFID (mode RESTO strict).
+\end{itemize}
+
+% ================= 2. BESOIN =================
+\section{Problématique et besoin}
+\subsection{Problème}
+\begin{itemize}
+  \item Paiement lent (files d’attente), risque d’erreur et manque de traçabilité.
+  \item Difficulté de gérer les recharges et l’historique.
+  \item Besoin de modes terminaux différents (buvette vs restaurant).
+\end{itemize}
+
+\subsection{Besoins identifiés}
+\begin{itemize}
+  \item Une interface web simple (admin/étudiant).
+  \item Une base de données centralisée (étudiants, comptes, cartes, produits, transactions).
+  \item Un terminal matériel (ESP32 + RFID) pour débiter des paiements.
+  \item Un scan code-barres rapide (webcam) pour la buvette.
+\end{itemize}
+
+% ================= 3. UTILISATEURS =================
+\section{Utilisateurs cibles}
+\begin{itemize}
+  \item \textbf{Étudiants :} consultation solde, carte RFID, historique, paiements.
+  \item \textbf{Administrateur :} gestion étudiants, produits, assignation cartes, recharges.
+  \item \textbf{Opérateur / Terminal :} validation du paiement RFID et logs série.
+\end{itemize}
+
+% ================= 4. OBJECTIFS =================
+\section{Objectifs du projet}
+\begin{itemize}
+  \item Paiement rapide et fiable en buvette et au restaurant.
+  \item Carte étudiante “smart” : identité \(\rightarrow\) accès au solde \(\rightarrow\) paiement.
+  \item Traçabilité complète des opérations (référence, solde avant/après).
+  \item Sécurité minimale (session, contrôles d’accès, CSRF sur actions sensibles).
+  \item Mode terminal \textbf{strict} : BUVETTE \(\neq\) RESTO.
+\end{itemize}
+
+\section{Valeur ajoutée et bénéfices}
+\begin{itemize}
+  \item \textbf{Bénéfices pour l’étudiant :} paiement plus rapide, suivi du solde et des dépenses, réduction des erreurs.
+  \item \textbf{Bénéfices pour l’administration :} gestion centralisée (cartes, étudiants, produits, recharges), historique exploitable.
+  \item \textbf{Bénéfices opérationnels :} traçabilité, réduction du cash, diminution des litiges (référence + solde avant/après).
+\end{itemize}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{p{0.30\textwidth} p{0.30\textwidth} p{0.30\textwidth}}
+\toprule
+\textbf{Critère} & \textbf{Avant (manuel)} & \textbf{Avec UniSmartPay}\\
+\midrule
+Temps de paiement & Variable, files d’attente & Rapide (RFID + scan)\\
+Traçabilité & Faible & Élevée (référence + historique)\\
+Erreurs & Fréquentes (caisse/tickets) & Réduites (validation + BD)\\
+Suivi du solde & Non centralisé & Tableau de bord étudiant\\
+\bottomrule
+\end{tabular}
+\caption{Bénéfices attendus (vue synthétique).}
+\end{table}
+
+\section{Périmètre et hypothèses}
+\textbf{Périmètre inclus :}
+\begin{itemize}
+  \item Gestion des étudiants, comptes, cartes RFID, produits et recharges.
+  \item Paiement RESTO (ticket fixe) et paiement BUVETTE (panier de produits).
+  \item Terminal ESP32 + RC522 pour lecture RFID et exécution du débit.
+\end{itemize}
+
+\textbf{Hors périmètre (pour cette version) :}
+\begin{itemize}
+  \item Paiement en ligne, multi-campus, intégration bancaire.
+  \item Gestion avancée des droits (RBAC fin), supervision et alerting.
+\end{itemize}
+
+% ================= 5. ÉTUDE MÉTIER =================
+\chapter{Analyse métier et organisation}
+\section{Étude et réflexion métier}
+\subsection{Contraintes}
+\begin{itemize}
+  \item Utilisation en local (XAMPP / réseau local), contraintes HTTPS pour l’accès webcam.
+  \item Débit de compte atomique : éviter le double débit (transactions SQL + verrouillage).
+  \item Fiabilité lecture RFID et gestion des timeouts réseau ESP32.
+\end{itemize}
+
+\subsection{Scénarios principaux}
+\paragraph{Scénario A — Buvette}
+(1) Scan produits \(\rightarrow\) panier, (2) création commande \textit{PENDING}, (3) ESP32 en MODE\_BUVETTE récupère et débite, (4) statut mis à jour (PAYE/ECHEC).
+
+\paragraph{Scénario B — Restaurant}
+(1) ESP32 en MODE\_RESTO lit UID, (2) backend vérifie carte/compte, (3) débit ticket fixe, (4) enregistrement transaction.
+
+\section{Règles métier (résumé)}
+\begin{itemize}
+  \item Une carte RFID doit être \textbf{connue} en base et \textbf{active} pour autoriser un paiement.
+  \item Un paiement nécessite un \textbf{solde suffisant} ; le débit est réalisé de manière atomique.
+  \item En BUVETTE, un paiement valide une \textbf{commande PENDING} (créée après scan/panier).
+  \item Chaque opération produit une trace : référence, statut, solde avant/après.
+\end{itemize}
+
+\subsection{Règles métier (détaillées)}
+Cette section formalise les contrôles appliqués côté serveur et côté terminal pour éviter les erreurs (double débit, panier vide, carte invalide) et garantir la traçabilité.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{p{0.27\textwidth} p{0.23\textwidth} p{0.40\textwidth}}
+\toprule
+\textbf{Règle} & \textbf{Lieu} & \textbf{Détail / objectif}\\
+\midrule
+Carte obligatoire & ESP32 + API & Aucun paiement sans UID RFID lu correctement.\\
+Carte existante & API & L’UID doit exister en base (sinon refus).\\
+Carte active & API & Statut de la carte contrôlé avant toute opération.\\
+Solde suffisant & API (transaction) & Refus si solde $<$ montant requis (RESTO/BUVETTE).\\
+Débit atomique & MySQL & Transaction SQL + verrouillage (ex: \texttt{SELECT ... FOR UPDATE}).\\
+BUVETTE: panier non vide & Web + API & Refus si aucune ligne produit n’est présente.\\
+BUVETTE: commande requise & ESP32 + API & Pas de débit si aucune commande \texttt{PENDING} disponible.\\
+Traçabilité & API + DB & Chaque débit crée une référence + solde avant/après + statut.\\
+\bottomrule
+\end{tabular}
+\caption{Règles métier détaillées (contrôles et objectifs).}
+\end{table}
+
+\section{Cas d’utilisation (UML — synthèse)}
+\begin{figure}[H]
+  \centering
+  \SmartFigure{cas_utilisation.png}{0.92\linewidth}
+  \caption{Diagramme de cas d’utilisation (placeholder).}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{p{0.24\textwidth} p{0.66\textwidth}}
+\toprule
+\textbf{Acteur} & \textbf{Cas d’utilisation principaux}\\
+\midrule
+Administrateur & Gérer étudiants, gérer produits, assigner carte, recharger solde, consulter historique.\\
+Étudiant & Consulter solde et historique, consulter carte, payer (selon mode).\\
+Terminal (ESP32) & Lire UID, vérifier carte/solde, débiter, journaliser, gérer erreurs réseau.\\
+\bottomrule
+\end{tabular}
+\caption{Acteurs et cas d’utilisation (synthèse).}
+\end{table}
+
+% ================= 6. ORGANISATION ÉQUIPE =================
+\section{Organisation de l’équipe et répartition des rôles}
+Vous êtes 5. La répartition adoptée (selon la difficulté et les préférences) :
+
+\subsection{Répartition des responsabilités}
+\begin{table}[H]
+\centering
+\begin{tabular}{p{0.25\textwidth} p{0.70\textwidth}}
+\toprule
+\textbf{Membre} & \textbf{Tâches principales}\\
+\midrule
+
+\textbf{\MemberA} & 
+Backend PHP (pages, validations), rapport et documentation, présentation (slides). \\
+
+\textbf{\MemberB} & 
+ESP32 / RC522 (RFID + WiFi + HTTP/JSON), câblage matériel, modes stricts RESTO/BUVETTE, intégration API, scan/caméra, monitoring (Web Serial), debug terrain,rapport final. \\
+
+\textbf{\MemberC} & 
+Backend PHP (API + logique métier), base de données MySQL (schéma, requêtes, transactions, intégrité, historique). \\
+
+\textbf{\MemberD} & 
+Développement code ESP32, validation end-to-end, tests système, jeux de données, vidéo de validation. \\
+
+\textbf{\MemberE} & 
+Design web / UI-UX (admin, étudiant, terminal), ergonomie, cohérence visuelle, responsive design, captures d’écran, rapport technique. \\
+
+\bottomrule
+\end{tabular}
+\caption{Répartition détaillée des tâches par membre.}
+\end{table}
+
+% ================= 7. MÉTHODE DE TRAVAIL =================
+\section{Méthode de travail et avancement}
+Organisation recommandée par phases :
+\begin{itemize}
+  \item Phase 1 : BD + Auth + pages de base.
+  \item Phase 2 : API + transactions + historique.
+  \item Phase 3 : Scan code-barres + panier + checkout buvette.
+  \item Phase 4 : ESP32 RFID + modes stricts + intégration.
+  \item Phase 5 : Tests, validation, corrections, documentation + slides.
+\end{itemize}
+
+\subsection{Planning (Gantt / timeline)}
+\begin{figure}[H]
+  \centering
+  \SmartFigure{planning.png}{0.92\linewidth}
+  \caption{Planning simplifié (placeholder).}
+\end{figure}
+
+% ================= 8. CONCEPTION =================
+\chapter{Conception et choix techniques}
+\section{Conception du projet}
+\subsection{Architecture globale}
+Le système est composé de :
+\begin{itemize}
+  \item \textbf{Web (navigateur)} : UI admin/étudiant/terminal + scan webcam + Web Serial.
+  \item \textbf{Serveur PHP} : pages + API JSON.
+  \item \textbf{MySQL} : persistance (étudiants, cartes, comptes, produits, commandes, transferts).
+  \item \textbf{ESP32} : RFID + requêtes HTTP vers API.
+\end{itemize}
+
+\begin{figure}[H]
+  \centering
+  \SmartFigure{archi.png}{0.92\linewidth}
+  \caption{Architecture globale (placeholder si image absente).}
+\end{figure}
+
+\subsection{Architecture applicative (détails)}
+\begin{itemize}
+  \item \textbf{Couche présentation :} pages PHP (admin/étudiant/terminal) + JavaScript (scan webcam, Web Serial).
+  \item \textbf{Couche API :} endpoints JSON utilisés par l’interface web et par l’ESP32.
+  \item \textbf{Couche données :} MySQL (transactions, commandes, historique).
+\end{itemize}
+
+\begin{figure}[H]
+  \centering
+  \SmartFigure{s_buv.png}{0.92\linewidth}
+  \caption{Séquence BUVETTE (scan → commande PENDING → claim ESP32 → paiement) (placeholder).}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \SmartFigure{s_resto.png}{0.92\linewidth}
+  \caption{Séquence RESTO (RFID → vérification → débit ticket fixe) (placeholder).}
+\end{figure}
+
+\subsection{Modèle de données (résumé)}
+Tables clés (résumé fonctionnel) :
+\begin{itemize}
+  \item \texttt{etudiants} : identité, matricule, faculté, hash mot de passe.
+  \item \texttt{cartes} : UID RFID, statut, dates, motif blocage, lien étudiant.
+  \item \texttt{comptes} : solde, lien étudiant.
+  \item \texttt{produits} : nom, code-barres, prix, stock, catégorie.
+  \item \texttt{terminal\_orders} : commandes buvette (PENDING/PAYE/ECHEC), montant, items.
+  \item \texttt{transferts} : historique (montant, type, statut, référence, solde avant/après).
+\end{itemize}
+
+\subsection{Relations (ERD simplifié)}
+\begin{figure}[H]
+  \centering
+  \SmartFigure{erd.png}{0.92\linewidth}
+  \caption{ERD / schéma relationnel simplifié (placeholder).}
+\end{figure}
+
+\subsection{API et échanges JSON (résumé)}
+Les pages web et l’ESP32 utilisent des endpoints JSON. Exemples :
+
+\begin{table}[H]
+\centering
+\begin{tabular}{p{0.36\textwidth} p{0.54\textwidth}}
+\toprule
+\textbf{Endpoint} & \textbf{Rôle}\\
+\midrule
+\texttt{web/api/barcode\_lookup.php} & Rechercher un produit par code-barres.\\
+\texttt{web/api/buvette\_checkout.php} & Créer une commande BUVETTE (PENDING) à partir du panier.\\
+\texttt{web/api/terminal\_order\_claim.php} & L’ESP32 récupère la commande PENDING.\\
+\texttt{web/api/terminal\_order\_pay.php} & L’ESP32 exécute le paiement et met à jour le statut.\\
+\texttt{web/api/card\_check.php} & Pré-vérifier carte + statut + solde.\\
+\bottomrule
+\end{tabular}
+\caption{API principales (synthèse).}
+\end{table}
+
+\subsection{Contrats API (exemples JSON)}
+Les endpoints ci-dessous illustrent les échanges typiques. Les champs exacts peuvent varier selon l’implémentation, mais le \textbf{principe} attendu reste le même : réponses structurées, statut explicite, et messages exploitables côté UI/terminal.
+
+\paragraph{1) Lookup produit (scan code-barres)}
+\textbf{But :} vérifier qu’un code-barres correspond à un produit existant.
+\begin{lstlisting}
+GET /web/api/barcode_lookup.php?barcode=6191234567890
+
+// Réponse OK
+{ "success": true,
+  "product": { "id": 12, "name": "Sandwich", "price": 2.500, "barcode": "6191234567890" } }
+
+// Réponse produit inconnu
+{ "success": false, "error": "PRODUCT_NOT_FOUND", "message": "Produit non enregistré" }
+\end{lstlisting}
+
+\paragraph{2) Création commande BUVETTE (checkout)}
+\textbf{But :} créer une commande \texttt{PENDING} à partir du panier (côté web).
+\begin{lstlisting}
+POST /web/api/buvette_checkout.php
+{ "items": [ {"product_id":12,"qty":2}, {"product_id":7,"qty":1} ] }
+
+// OK
+{ "success": true,
+  "order": { "id": 104, "status": "PENDING", "total": 7.500 } }
+
+// Erreur panier vide
+{ "success": false, "error": "EMPTY_CART", "message": "Panier vide" }
+\end{lstlisting}
+
+\paragraph{3) Claim commande (ESP32 en mode BUVETTE)}
+\textbf{But :} permettre à l’ESP32 de récupérer une commande \texttt{PENDING} (une seule fois).
+\begin{lstlisting}
+POST /web/api/terminal_order_claim.php
+{ "terminal_id": "ESP32-01" }
+
+// OK
+{ "success": true,
+  "order": { "id": 104, "total": 7.500, "status": "PENDING" } }
+
+// Aucun pending
+{ "success": false, "error": "NO_PENDING_ORDER", "message": "Aucune commande en attente" }
+\end{lstlisting}
+
+\paragraph{4) Pré-check carte/solde}
+\textbf{But :} refuser tôt (carte inconnue/inactive, solde insuffisant) avant paiement.
+\begin{lstlisting}
+POST /web/api/card_check.php
+{ "uid": "04A1B2C3D4" }
+
+// OK
+{ "success": true,
+  "card": { "active": true },
+  "account": { "balance": 20.000 } }
+
+// Carte inconnue
+{ "success": false, "error": "CARD_NOT_FOUND", "message": "Carte non enregistrée" }
+\end{lstlisting}
+
+\paragraph{5) Paiement (RESTO / BUVETTE)}
+\textbf{But :} déclencher le débit en transaction, puis renvoyer une référence + solde avant/après.
+\begin{lstlisting}
+POST /web/api/payment.php
+{ "uid": "04A1B2C3D4", "mode": "RESTO", "amount": 3.000 }
+
+// OK
+{ "success": true, "reference": "TRX-2026-000104",
+  "balance_before": 20.000, "balance_after": 17.000 }
+
+// Solde insuffisant
+{ "success": false, "error": "INSUFFICIENT_FUNDS", "message": "Solde insuffisant" }
+\end{lstlisting}
+
+\subsection{Sécurité (niveau projet)}
+\begin{itemize}
+  \item Sessions côté web (auth admin/étudiant).
+  \item Protection CSRF sur opérations sensibles.
+  \item Validation côté serveur (UID, montants, statuts, contrôle d’accès).
+\end{itemize}
+
+\subsection{Intégrité des transactions (anti double débit)}
+Le point critique du système est le débit du compte : il doit être \textbf{cohérent} même en cas d’accès concurrent (double clic, deux terminaux, latence réseau). La stratégie retenue est :
+\begin{itemize}
+  \item effectuer le débit dans une \textbf{transaction SQL} ;
+  \item verrouiller la ligne compte lors du calcul (ex: \texttt{SELECT ... FOR UPDATE}) ;
+  \item vérifier le solde, puis débiter, puis insérer l’écriture d’historique, puis valider (\texttt{COMMIT}).
+\end{itemize}
+Cela garantit que le solde ne peut pas devenir négatif et qu’une même commande ne peut pas être payée deux fois si les statuts sont bien contrôlés.
+
+% ================= 9. CHOIX TECHNIQUES =================
+\section{Choix techniques et méthodologiques}
+\begin{itemize}
+  \item \textbf{Backend :} PHP (PDO) + sessions.
+  \item \textbf{BD :} MySQL (XAMPP).
+  \item \textbf{Scan :} API BarcodeDetector + ZXing + Quagga fallback.
+  \item \textbf{Terminal :} ESP32 + RC522 (RFID).
+  \item \textbf{Sécurité :} CSRF sur opérations sensibles, contrôles d’accès.
+\end{itemize}
+
+% ================= 10. IHM/UX =================
+\section{Aspect IHM / UX}
+Les interfaces suivent un thème sombre uniforme (cartes, badges, tables) et privilégient un parcours simple.
+
+\subsection{Captures d’écran (à déposer dans \texttt{report/figures/})}
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \centering
+    \SmartFigure{figures/login_adm.png}{\linewidth}
+    \caption{Login administrateur}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \centering
+    \SmartFigure{figures/login_etd.png}{\linewidth}
+    \caption{Login étudiant}
+  \end{subfigure}
+
+  \vspace{10pt}
+  \begin{subfigure}{0.98\textwidth}
+    \centering
+    \SmartFigure{figures/dashboard_adm.png}{\linewidth}
+    \caption{Dashboard admin (gestion étudiants/produits/cartes/recharge)}
+  \end{subfigure}
+
+  \caption{IHM principale (placeholders).}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \SmartFigure{figures/dashboard.png}{0.92\linewidth}
+  \caption{Page d’accueil (accès + terminaux) (optionnel).}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \centering
+    \SmartFigure{figures/ajout_etd.png}{\linewidth}
+    \caption{Admin : ajouter étudiant}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \centering
+    \SmartFigure{figures/charge.png}{\linewidth}
+    \caption{Admin : assignation carte + recharge}
+  \end{subfigure}
+
+  \vspace{10pt}
+  \begin{subfigure}{0.72\textwidth}
+    \centering
+    \SmartFigure{figures/ajout_prd.png}{\linewidth}
+    \caption{Admin : ajouter produit (code-barres)}
+  \end{subfigure}
+
+  \caption{Captures admin (gestion des données) (optionnel).}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \centering
+    \SmartFigure{figures/mode_resto.png}{\linewidth}
+    \caption{Terminal — Mode RESTO}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \centering
+    \SmartFigure{figures/mode_buvette.png}{\linewidth}
+    \caption{Terminal — Mode BUVETTE (scan + panier)}
+  \end{subfigure}
+
+  \vspace{10pt}
+  \begin{subfigure}{0.48\textwidth}
+    \centering
+    \SmartFigure{figures/voir_resltat.png}{\linewidth}
+    \caption{Paiement RESTO (résultat)}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \centering
+    \SmartFigure{figures/voir_resltat.png}{\linewidth}
+    \caption{Serial Monitor (USB) dans le navigateur}
+  \end{subfigure}
+
+  \caption{IHM terminal et paiement (optionnel).}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}{0.58\textwidth}
+    \centering
+    \SmartFigure{figures/dashboard_etd.png}{\linewidth}
+    \caption{Dashboard étudiant (solde, carte, transactions)}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.40\textwidth}
+    \centering
+    \SmartFigure{figures/donneés de carte.png}{\linewidth}
+    \caption{Détails carte RFID}
+  \end{subfigure}
+
+  \caption{IHM étudiant (optionnel).}
+\end{figure}
+
+% ================= 11. RÉALISATION =================
+\chapter{Réalisation et déploiement}
+\section{Réalisation (ce qui a été développé)}
+\subsection{Fonctionnalités web}
+\begin{itemize}
+  \item Auth admin/étudiant, dashboards.
+  \item Admin : ajout étudiant, ajout produit, assignation carte, recharge.
+  \item Étudiant : solde, carte RFID, historique, paiement resto, paiement buvette (scan).
+\end{itemize}
+
+\subsection{Fonctionnalités terminal}
+\begin{itemize}
+  \item Mode RESTO : débit ticket fixe via RFID.
+  \item Mode BUVETTE : panier via scan, création commande, paiement via RFID.
+  \item Serial Monitor web (USB) pour debug.
+\end{itemize}
+
+\subsection{Détails du firmware ESP32 (résumé)}
+Le terminal ESP32 est responsable de la lecture RFID (UID), de la communication réseau (HTTP) et du feedback utilisateur (LEDs). Il suit une logique stricte :
+\begin{itemize}
+  \item Lecture UID \(\rightarrow\) pré-check BD (carte active + solde) \(\rightarrow\) exécution du débit.
+  \item \textbf{RESTO} : débit d’un ticket fixe.
+  \item \textbf{BUVETTE} : paiement d’une commande \texttt{PENDING} (créée côté web).
+\end{itemize}
+
+\begin{figure}[H]
+  \centering
+  \SmartFigure{logique.jpg}{0.92\linewidth}
+  \caption{Logique ESP32 (placeholder).}
+\end{figure}
+
+\subsection{Fonctionnement RFID + LEDs (3 images à fournir)}
+Décrire et illustrer comment la carte est lue et comment la signalisation (LED/buzzer) informe l’utilisateur.
+
+\subsubsection{Montage réel (machine) — terminal ESP32}
+La photo suivante illustre le montage réel utilisé pendant la démonstration (ESP32 + RC522 + câblage + LEDs), en conditions proches de l’utilisation.
+
+\begin{figure}[H]
+  \centering
+  \SmartFigure{5.jpeg}{0.92\linewidth}
+  \caption{Montage réel du terminal (ESP32 + RC522) (photo).}
+\end{figure}
+
+
+\subsubsection{Câblage ESP32 \texorpdfstring{$\leftrightarrow$}{<->} RC522 (RFID)}
+Le lecteur RFID RC522 est connecté à l’ESP32 via le bus SPI. La figure suivante illustre un câblage type (MOSI/MISO/SCK/SS + RST + alimentation 3.3V).
+
+\begin{figure}[H]
+  \centering
+  \SmartFigure{figures/caplage.jpg}{0.92\linewidth}
+  \caption{Schéma de câblage ESP32 \texorpdfstring{$\leftrightarrow$}{<->} RC522 (SPI).}
+\end{figure}
+
+\subsubsection{Principe de signalisation (exemple)}
+La signalisation permet à l’utilisateur de comprendre l’état du paiement sans regarder l’écran :
+\begin{itemize}
+  \item \textbf{LED verte} : carte valide / paiement réussi.
+  \item \textbf{LED rouge} : carte inconnue, solde insuffisant ou erreur.
+  \item \textbf{LED bleue} (optionnel) : attente / lecture en cours / connexion réseau.
+  \item \textbf{Buzzer} (optionnel) : bip court = OK ; bip long ou double bip = erreur.
+\end{itemize}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{p{0.30\textwidth} p{0.60\textwidth}}
+\toprule
+\textbf{État} & \textbf{Feedback recommandé}\\
+\midrule
+Lecture UID & Bleu clignotant (ou aucune LED), 1 bip court.\\
+Validation backend OK & Vert fixe 1s, 1 bip court.\\
+Paiement refusé (solde/carte) & Rouge fixe 1–2s, 2 bips courts.\\
+Erreur réseau/timeout & Rouge clignotant, 1 bip long.\\
+\bottomrule
+\end{tabular}
+\caption{Exemple de mapping état → LEDs/buzzer.}
+\end{table}
+
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}{0.32\textwidth}
+    \centering
+    \SmartFigure{7.png}{\linewidth}
+    \caption{Lecture UID}
+  \end{subfigure}
+
+  \begin{subfigure}{0.32\textwidth}
+    \centering
+    \SmartFigure{led.png}{\linewidth}
+    \caption{Feedback LEDs}
+  \end{subfigure}
+  \caption{Fonctionnement RFID/LED (placeholders).}
+\end{figure}
+
+% ================= DÉPLOIEMENT =================
+\section{Consignes d’exécution (XAMPP)}
+\subsection{Prérequis}
+\begin{itemize}
+  \item XAMPP (Apache + MySQL), navigateur Chrome/Edge (Web Serial).
+  \item Accès local : \texttt{http://localhost/UniSmartPay/web/}
+  \item (Optionnel) Arduino IDE / PlatformIO pour flasher l’ESP32.
+\end{itemize}
+
+\subsection{Lancement}
+\begin{enumerate}
+  \item Importer la base : \texttt{database/unismart_pay_schema.sql}.
+  \item Vérifier la connexion DB dans \texttt{web/config/config.php} (ex: \texttt{DB\_PORT=3307}).
+  \item Démarrer Apache/MySQL via XAMPP.
+  \item Ouvrir : \texttt{/UniSmartPay/web/index.php}
+\end{enumerate}
+
+\subsection{Données minimales pour une démo (checklist)}
+\begin{itemize}
+  \item 1 étudiant + 1 compte avec solde > 0.
+  \item 1 carte RFID assignée et \texttt{active}.
+  \item 3 produits avec code-barres et prix.
+\end{itemize}
+
+\section{Structure du dépôt (documentation technique courte)}
+Cette section résume l’organisation du code pour faciliter l’évaluation.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{p{0.26\textwidth} p{0.66\textwidth}}
+\toprule
+\textbf{Dossier/Fichier} & \textbf{Rôle}\\
+\midrule
+\texttt{web/} & Application web (pages PHP, assets, espaces admin/étudiant/terminal).\\
+\texttt{web/includes/} & Header/footer et helpers (auth, CSRF, utilitaires).\\
+\texttt{web/api/} & Endpoints JSON (barcode lookup, checkout buvette, commandes terminal, logs, etc.).\\
+\texttt{web/config/} & Configuration application + PDO (hôte/port DB, base URL).\\
+\texttt{database/} & Scripts SQL (initialisation, correctifs, données de test).\\
+\texttt{esp32/} & Code Arduino/ESP32 (RFID + WiFi + appels API).\\
+\texttt{api/} & Dossier réservé (actuellement vide / non utilisé).\\
+\texttt{report/} & Rapport LaTeX (ce document) + figures.\\
+\texttt{slides/} & Slides LaTeX (Beamer) ≤ 15 pages.\\
+\bottomrule
+\end{tabular}
+\caption{Structure du projet.}
+\end{table}
+
+\section{Guide utilisateur (simple)}
+\subsection{Espace administrateur}
+\begin{itemize}
+  \item Se connecter (email + mot de passe).
+  \item Ajouter des produits (nom, code-barres, prix, stock) afin que le scan fonctionne.
+  \item Ajouter des étudiants (matricule, email, faculté) puis créer/activer leur compte.
+  \item Assigner une carte RFID (UID) à un étudiant.
+  \item Recharger un compte pour permettre les paiements.
+\end{itemize}
+
+\subsection{Espace étudiant}
+\begin{itemize}
+  \item Se connecter (matricule + mot de passe).
+  \item Consulter solde, carte RFID et historique des transactions.
+  \item Paiement RESTO : déclencher le paiement du ticket fixe (si activé).
+  \item Paiement BUVETTE : scanner des produits (si la caméra est autorisée) puis payer.
+\end{itemize}
+
+\subsection{Terminal}
+\begin{itemize}
+  \item Mode RESTO : passer la carte RFID sur l’ESP32 pour débiter le ticket.
+  \item Mode BUVETTE : après création de commande (depuis la page terminal), passer la carte RFID pour valider.
+  \item Utiliser le Serial Monitor web (USB) pour observer les logs et diagnostiquer.
+\end{itemize}
+
+\subsection{Comptes de démonstration (si activés)}
+\begin{itemize}
+  \item Admin : \texttt{admin@unismart.tn} / \texttt{Admin@1234}
+  \item Étudiant : \texttt{2024/FST/0001} / \texttt{Etudiant@1234}
+\end{itemize}
+
+% ================= 12. RÉSULTATS =================
+\chapter{Validation et bilan}
+\section{Résultats obtenus}
+\begin{itemize}
+  \item Paiement RESTO opérationnel (ticket fixe, transaction enregistrée).
+  \item Paiement BUVETTE opérationnel (scan, commande, paiement RFID).
+  \item Historique consultable avec références et solde avant/après.
+  \item Terminal strict : pas de confusion entre BUVETTE et RESTO.
+\end{itemize}
+
+% ================= 13. TESTS =================
+\section{Tests et validation}
+\subsection{Tests réalisés}
+\begin{itemize}
+  \item Scan : produits connus vs inconnus, performance et stabilité.
+  \item Paiements : solde suffisant/insuffisant, carte active/inactive.
+  \item BUVETTE : produit introuvable, panier vide, commande absente (pas de \texttt{PENDING}).
+  \item Concurrence : verrouillage solde (FOR UPDATE).
+  \item Terminal : timeouts, reconnexion WiFi, mauvais URL serveur, correction IPv4.
+\end{itemize}
+
+\subsection{Matrice de tests (exemples)}
+\begin{table}[H]
+\centering
+\begin{tabular}{p{0.32\textwidth} p{0.22\textwidth} p{0.36\textwidth}}
+\toprule
+\textbf{Cas} & \textbf{Attendu} & \textbf{Validation}\\
+\midrule
+Carte inconnue & Refus & LED rouge + aucune écriture transfert\\
+Carte inactive & Refus & Statut carte contrôlé côté API\\
+Solde insuffisant & Refus & Pas de débit, message clair\\
+Produit non enregistré (scan) & Refus/alerte & Produit non ajouté au panier, message d’erreur\\
+Panier vide (checkout buvette) & Refus & Aucune commande créée, message d’erreur\\
+Erreur réseau ESP32 & Refus/timeout & Logs + feedback rouge\\
+Commande BUVETTE absente & Refus & Aucun débit sans \texttt{PENDING}\\
+\bottomrule
+\end{tabular}
+\caption{Matrice de tests fonctionnels (exemples).}
+\end{table}
+
+\subsection{Gestion des exceptions (détaillée + captures)}
+L’objectif principal est de \textbf{refuser proprement} toute action invalide (carte inconnue, solde insuffisant, panier vide, etc.) en garantissant deux points :
+\begin{itemize}
+  \item \textbf{Aucun débit} n’est effectué si une condition préalable échoue.
+  \item Un \textbf{message clair} est affiché (UI web / logs série) et un feedback (LED) est déclenché côté terminal.
+\end{itemize}
+
+\paragraph{Cas 1 — Carte non enregistrée}
+\textbf{Déclencheur :} l’utilisateur passe une carte RFID inconnue. \textbf{Détection :} l’API ne trouve pas l’UID en base. \textbf{Résultat :} paiement refusé, aucune transaction, feedback d’erreur.
+
+\paragraph{Cas 2 — Solde insuffisant}
+\textbf{Déclencheur :} carte valide mais solde $<$ montant requis (ticket RESTO ou total BUVETTE). \textbf{Détection :} contrôle solde côté backend (avec verrouillage/transaction). \textbf{Résultat :} paiement refusé, solde inchangé.
+
+\paragraph{Cas 3 — Produit non enregistré (scan)}
+\textbf{Déclencheur :} scan d’un code-barres introuvable. \textbf{Détection :} endpoint de lookup retourne “non trouvé”. \textbf{Résultat :} produit non ajouté au panier, message explicite.
+
+\paragraph{Cas 4 — Panier vide (checkout buvette)}
+\textbf{Déclencheur :} l’utilisateur clique “Payer” avec un panier vide. \textbf{Détection :} validation côté serveur (liste items vide). \textbf{Résultat :} aucune commande \texttt{PENDING} créée, message explicite.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{p{0.26\textwidth} p{0.26\textwidth} p{0.34\textwidth}}
+\toprule
+\textbf{Exception} & \textbf{Comportement attendu} & \textbf{Capture à fournir}\\
+\midrule
+Carte non enregistrée & Refus + aucun débit + feedback erreur & \texttt{figures/exc\_carte\_inconnue.png}\\
+Solde insuffisant & Refus + solde inchangé & \texttt{figures/exc\_solde\_insuffisant.png}\\
+Produit non enregistré (scan) & Produit non ajouté + message & \texttt{figures/exc\_produit\_inconnu.png}\\
+Panier vide (checkout) & Aucune commande créée + message & \texttt{figures/exc\_panier\_vide.png}\\
+Commande \texttt{PENDING} absente & Refus côté ESP32 (pas de débit) & \texttt{figures/exc\_commande\_absente.png}\\
+Erreur réseau / timeout & Refus + logs + feedback erreur & \texttt{figures/exc\_reseau\_timeout.png}\\
+\bottomrule
+\end{tabular}
+\caption{Synthèse des exceptions testées (avec captures attendues).}
+\end{table}
+
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \centering
+    \SmartFigure{1.png}{\linewidth}
+    \caption{Carte non enregistrée}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \centering
+    \SmartFigure{2.png}{\linewidth}
+    \caption{Solde insuffisant}
+  \end{subfigure}
+
+  \vspace{10pt}
+  \begin{subfigure}{0.48\textwidth}
+    \centering
+    \SmartFigure{3.png}{\linewidth}
+    \caption{Produit non enregistré (scan)}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \centering
+    \SmartFigure{4.png}{\linewidth}
+    \caption{Panier vide (checkout buvette)}
+  \end{subfigure}
+  \caption{Captures d’écran des exceptions (placeholders).}
+\end{figure}
+
+\subsection{Validation par scénarios}
+\begin{itemize}
+  \item Scénario BUVETTE complet (scan → commande → RFID → PAYE).
+  \item Scénario RESTO complet (RFID → débit ticket → transfert enregistré).
+\end{itemize}
+
+% ================= 14. DIFFICULTÉS =================
+\section{Difficultés rencontrées et solutions}
+\begin{itemize}
+  \item \textbf{Webcam/HTTPS :} blocage caméra sur origines non sécurisées (solution : localhost/HTTPS).
+  \item \textbf{Timeout ESP32 :} URL serveur incorrecte (solution : IP locale correcte + timeouts).
+  \item \textbf{UID mismatch :} format UID vs base (solution : normalisation / vérification).
+  \item \textbf{Performance scan :} réglages rapides (formats limités, zone de scan, cooldown).
+\end{itemize}
+
+\section{Limites actuelles}
+\begin{itemize}
+  \item Sécurité perfectible pour un déploiement à grande échelle (HTTPS, durcissement des accès API, RBAC fin).
+  \item Dépendance aux contraintes navigateur (permissions caméra / Web Serial).
+  \item Déploiement local (XAMPP) : adaptation nécessaire pour un serveur de production.
+\end{itemize}
+
+% ================= 15. DÉPLOIEMENT =================
+% ================= CONCLUSION =================
+\section{Conclusion et perspectives}
+Le projet démontre une solution de paiement campus intégrant scan code-barres et RFID, avec traçabilité des transactions. Perspectives : amélioration du HTTPS en réseau local, meilleure ergonomie mobile, rapports avancés admin, et durcissement sécurité (RBAC fin, limitation IP terminal, etc.).
+
+\end{document}

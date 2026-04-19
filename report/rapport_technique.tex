@@ -1,0 +1,412 @@
+% !TeX program = pdflatex
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{geometry}
+\geometry{margin=2.4cm}
+
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{enumitem}
+\usepackage{caption}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue,
+  urlcolor=blue
+}
+
+\setlist[itemize]{topsep=4pt,itemsep=2pt}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  frame=single,
+  rulecolor=\color{black!15},
+  backgroundcolor=\color{black!2}
+}
+
+% ====== À REMPLIR PAR VOUS ======
+\newcommand{\ProjectTitle}{UniSmartPay — Système de paiement universitaire RFID + code-barres}
+\newcommand{\GroupClass}{\textit{(Classe / groupe à compléter)}}
+\newcommand{\MemberA}{Ele Meskini}
+\newcommand{\MemberB}{Mohamed Khalil Jadlaoui}
+\newcommand{\MemberC}{Fayech Jallel}
+\newcommand{\MemberD}{Fourat Andolsi}
+\newcommand{\MemberE}{Ahmed Smaili}
+\newcommand{\GitHubURL}{\url{https://github.com/ORG/REPO}}
+
+% Helper: safe includegraphics (compile even if file missing)
+% Usage: \SmartFigure{figures/file.png}{0.9\linewidth}
+\newcommand{\SmartFigure}[2]{%
+  \IfFileExists{#1}{\includegraphics[width=#2]{#1}}{%
+    \fbox{\begin{minipage}[c][0.18\textheight][c]{#2}
+      \centering\small\textit{Image manquante}\\
+      \texttt{#1}\\
+      \vspace{4pt}
+      Déposez l'image dans \texttt{report/figures/}
+    \end{minipage}}%
+  }%
+}
+
+\title{\ProjectTitle}
+\author{\MemberA \and \MemberB \and \MemberC \and \MemberD \and \MemberE}
+\date{Avril 2026}
+
+\begin{document}
+
+\begin{titlepage}
+  \centering
+
+  % Logos (optionnels)
+  \begin{figure}[H]
+    \centering
+    \begin{minipage}{0.48\textwidth}
+      \centering
+      \SmartFigure{figures/logo_fac.png}{0.55\linewidth}
+    \end{minipage}
+    \begin{minipage}{0.48\textwidth}
+      \centering
+      \SmartFigure{figures/logofst.png}{0.55\linewidth}
+    \end{minipage}
+  \end{figure}
+
+  \vspace{8pt}
+  {\LARGE\bfseries \ProjectTitle\par}
+  \vspace{8pt}
+  {\large Document technique du projet (Rendu final)\par}
+  \vspace{10pt}
+
+  {\GroupClass\par}
+  \vspace{12pt}
+
+  \begin{tabular}{ll}
+    \textbf{Groupe :} & \MemberA, \MemberB, \MemberC, \MemberD, \MemberE\\
+    \textbf{Date :} & \today\\
+    \textbf{Dépôt GitHub :} & \GitHubURL\\
+  \end{tabular}
+
+  \vfill
+  \begin{minipage}{0.9\textwidth}
+    \small
+    \textbf{Résumé.} L’idée principale est de rendre la \textbf{carte étudiante “smart”} : elle devient une clé d’accès à un compte prépayé consultable, rechargeable et traçable, utilisable pour payer rapidement à la buvette et au restaurant. UniSmartPay combine la lecture RFID (carte étudiante) et le scan de code-barres (produits), avec une interface web (admin/étudiant/terminal), une base MySQL et un terminal ESP32/RC522.
+  \end{minipage}
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+\section{Informations groupe et projet}
+\begin{itemize}
+  \item \textbf{Projet :} UniSmartPay (paiement campus RFID + code-barres).
+  \item \textbf{Idée principale :} la carte étudiante devient une carte de paiement intelligente (identification + accès au solde + paiement).
+  \item \textbf{Objectif :} réduire les files d’attente et assurer la traçabilité (référence + solde avant/après).
+  \item \textbf{Composants :} Web PHP (PDO), MySQL, scan code-barres via webcam, terminal ESP32 + lecteur RFID RC522.
+\end{itemize}
+
+\subsection{Répartition des rôles (résumé)}
+\begin{itemize}
+  \item \textbf{\MemberB} : ESP32/RC522, câblage, modes terminal, intégration API, scan/caméra.
+  \item \textbf{\MemberE} : design web / UI-UX.
+  \item \textbf{\MemberC} : backend PHP (API + logique métier) + MySQL (transactions).
+  \item \textbf{\MemberA} : backend PHP (pages/validations) + rapport/documentation + livrables.
+  \item \textbf{\MemberD} : \textbf{pas de tâches PHP} ; aide \MemberB sur le \textbf{code ESP32} (tests/debug/logs) + validation/jeux de données.
+\end{itemize}
+
+\section{Lien GitHub}
+\GitHubURL
+
+\section{Instructions pour exécuter le projet}
+\subsection{Prérequis}
+\begin{itemize}
+  \item Windows + XAMPP (Apache + MySQL).
+  \item PHP 8.x recommandé.
+  \item Navigateur Chrome/Edge pour le Web Serial (optionnel) et le scan webcam.
+\end{itemize}
+
+\subsection{Installation (XAMPP + MySQL) — étapes détaillées}
+\begin{enumerate}
+  \item Copier le dossier du projet dans \texttt{htdocs} (ex: \texttt{C:\\xampp\\htdocs\\UniSmartPay}).
+  \item Démarrer XAMPP : \textbf{Apache} et \textbf{MySQL} en \textit{Running}.
+  \item Ouvrir phpMyAdmin : \url{http://localhost/phpmyadmin}.
+  \item Importer la base de données : \texttt{database/unismart_pay_schema.sql}.
+  \begin{itemize}
+    \item Si le script SQL crée déjà la base, il suffit de \textit{Importer}.
+    \item Sinon : créer une base (ex: \texttt{unismart\_pay}) puis importer le fichier SQL dans cette base.
+  \end{itemize}
+  \item Vérifier / adapter la configuration DB dans \texttt{web/config/config.php} (ex: \texttt{DB\_HOST=127.0.0.1}, \texttt{DB\_PORT=3307}, \texttt{DB\_USER=root}).
+\end{enumerate}
+
+\subsection{Configuration (paramètres importants)}
+\begin{itemize}
+  \item \textbf{MySQL Port :} dans ce projet, MySQL est souvent sur \texttt{3307}. Assurez-vous que \texttt{DB\_PORT} correspond à votre XAMPP.
+  \item \textbf{DB\_HOST :} en cas d’erreur de connexion, utiliser \texttt{127.0.0.1} (force TCP) au lieu de \texttt{localhost}.
+  \item \textbf{URL d’accès :} l’application web tourne sur \texttt{http://localhost/UniSmartPay/web/}.
+\end{itemize}
+
+\subsection{Vérification rapide (smoke test)}
+\begin{enumerate}
+  \item Ouvrir l’accueil : \url{http://localhost/UniSmartPay/web/}.
+  \item Se connecter en admin et vérifier que le dashboard s’affiche.
+  \item Vérifier qu’un endpoint JSON répond (exemple) : \texttt{/web/api/card\_check.php}.
+\end{enumerate}
+
+\subsection{Lancer l’application}
+\begin{itemize}
+  \item Accueil : \url{http://localhost/UniSmartPay/web/}
+  \item Admin : \url{http://localhost/UniSmartPay/web/admin/login.php}
+  \item Étudiant : \url{http://localhost/UniSmartPay/web/etudiant/login.php}
+\end{itemize}
+
+\subsection{Comptes de démonstration}
+\begin{itemize}
+  \item Admin : \texttt{admin@unismart.tn} / \texttt{Admin@1234}
+  \item Étudiant : \texttt{2024/FST/0001} / \texttt{Etudiant@1234}
+\end{itemize}
+
+\subsection{Données minimales pour une démonstration (checklist)}
+Pour valider le parcours complet (scan + paiement), préparer au minimum :
+\begin{itemize}
+  \item 1 étudiant avec un compte et un \textbf{solde} positif.
+  \item 1 carte RFID \textbf{assignée} à cet étudiant et \textbf{active}.
+  \item 3 produits avec \textbf{code-barres} et \textbf{prix} (pour le mode BUVETTE).
+\end{itemize}
+\textbf{Conseil :} créer ces données via l’interface admin (plus simple à justifier dans un rendu que des inserts SQL).
+
+\subsection{Optionnel : terminal RFID (ESP32)}
+\begin{itemize}
+  \item Firmware : \texttt{esp32/unismart_pay_terminal.ino}
+  \item Endpoints principaux :
+  \begin{itemize}
+    \item Legacy (paiement RESTO) : \texttt{/web/api/payment.php}
+    \item Flux buvette (commande) : \texttt{/web/api/terminal\_order\_claim.php} et \texttt{/web/api/terminal\_order\_pay.php}
+    \item Vérification carte : \texttt{/web/api/card\_check.php}
+    \item Mode dynamique : \texttt{/web/api/terminal\_mode\_get.php} et \texttt{/web/api/terminal\_mode\_set.php}
+  \end{itemize}
+\end{itemize}
+
+\subsubsection*{Point critique réseau (ESP32 \texorpdfstring{$\leftrightarrow$}{<->} serveur)}
+\begin{itemize}
+  \item Depuis l’ESP32, \texttt{http://localhost/...} ne fonctionne pas (localhost = ESP32).
+  \item Utiliser l’\textbf{IP locale} du PC qui héberge XAMPP (ex: \texttt{http://192.168.1.10/UniSmartPay/web/api/...}).
+  \item En cas de timeout : vérifier que le PC et l’ESP32 sont sur le même WiFi et que le firewall autorise Apache.
+\end{itemize}
+
+\subsection{Déroulé de démonstration (recommandé)}
+\paragraph{Démo RESTO}
+\begin{enumerate}
+  \item Mettre le terminal en mode \textbf{RESTO} (page terminal ou endpoint \texttt{terminal\_mode\_set.php}).
+  \item Passer la carte RFID : l’API vérifie carte+solde puis débite le ticket.
+  \item Résultat attendu : succès + transaction enregistrée, LED verte.
+\end{enumerate}
+
+\paragraph{Démo BUVETTE}
+\begin{enumerate}
+  \item Mettre le terminal en mode \textbf{BUVETTE}.
+  \item Scanner 2--3 produits (code-barres) pour constituer un panier.
+  \item Cliquer \textit{Payer} : création d’une commande \texttt{PENDING}.
+  \item Passer la carte RFID sur l’ESP32 : claim de la commande puis paiement.
+  \item Résultat attendu : commande \texttt{PAYE} et solde mis à jour.
+\end{enumerate}
+
+\section{Architecture et organisation du code}
+\subsection{Architecture (vue synthétique)}
+\begin{itemize}
+  \item \textbf{Web (navigateur)} : UI Admin/Étudiant/Terminal, scan webcam, Web Serial.
+  \item \textbf{Serveur PHP} : pages + API JSON (PDO).
+  \item \textbf{MySQL} : persistance (étudiants, comptes, cartes, produits, transferts, commandes terminal).
+  \item \textbf{ESP32} : lecture RFID + appels HTTP (vérification carte / paiement / logs).
+\end{itemize}
+
+\begin{figure}[H]
+  \centering
+  \SmartFigure{archi.png}{0.92\linewidth}
+  \caption{Architecture globale (optionnel).}
+\end{figure}
+
+\subsection{Organisation du dépôt}
+\begin{lstlisting}
+UniSmartPay/
+  web/                 # Application PHP (pages + API)
+    admin/             # UI admin
+    etudiant/          # UI étudiant
+    terminal/          # UI terminal (RESTO/BUVETTE)
+    api/               # Endpoints JSON (paiement, scan, commandes...)
+    config/            # Config app + PDO
+    includes/          # Helpers (CSRF, auth, utilitaires)
+  database/            # Schéma SQL (import initial)
+  esp32/               # Firmware ESP32 (RFID + WiFi)
+  assets/              # JS/CSS + libs scan (ZXing/Quagga)
+  slides/              # Présentation finale (LaTeX)
+  report/              # Rapport + figures
+\end{lstlisting}
+
+\subsection{Câblage ESP32 \texorpdfstring{$\leftrightarrow$}{<->} RC522}
+\begin{figure}[H]
+  \centering
+  \SmartFigure{figures/caplage.jpg}{0.92\linewidth}
+  \caption{Schéma de câblage ESP32 \texorpdfstring{$\leftrightarrow$}{<->} RC522 (SPI).}
+\end{figure}
+
+\section{Captures d’écran (interfaces)}
+Cette section illustre rapidement les écrans principaux. Déposez les images dans \texttt{report/figures/} avec les noms indiqués ci-dessous.
+
+\subsection{Accueil}
+\begin{figure}[H]
+  \centering
+  \SmartFigure{figures/dashboard.png}{0.92\linewidth}
+  \caption{Page d’accueil (accès + terminaux).}
+\end{figure}
+
+\subsection{Espace administrateur}
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \centering
+    \SmartFigure{figures/login_adm.png}{\linewidth}
+    \caption{Connexion admin}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \centering
+    \SmartFigure{figures/dashboard_adm.png}{\linewidth}
+    \caption{Dashboard admin}
+  \end{subfigure}
+
+  \vspace{10pt}
+  \begin{subfigure}{0.48\textwidth}
+    \centering
+    \SmartFigure{figures/ajout_etd.png}{\linewidth}
+    \caption{Ajout étudiant}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \centering
+    \SmartFigure{figures/charge.png}{\linewidth}
+    \caption{Assignation carte + recharge}
+  \end{subfigure}
+
+  \vspace{10pt}
+  \begin{subfigure}{0.70\textwidth}
+    \centering
+    \SmartFigure{figures/ajout_prd.png}{\linewidth}
+    \caption{Ajout produit (code-barres)}
+  \end{subfigure}
+
+  \caption{Fonctionnalités administrateur (gestion des données).}
+\end{figure}
+
+\subsection{Espace étudiant}
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \centering
+    \SmartFigure{figures/login_etd.png}{\linewidth}
+    \caption{Connexion étudiant}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \centering
+    \SmartFigure{figures/dashboard_etd.png}{\linewidth}
+    \caption{Dashboard (solde + transactions)}
+  \end{subfigure}
+
+  \vspace{10pt}
+  \begin{subfigure}{0.92\textwidth}
+    \centering
+    \SmartFigure{figures/donneés de carte.png}{0.78\linewidth}
+    \caption{Détails carte RFID}
+  \end{subfigure}
+  \caption{Fonctionnalités étudiant.}
+\end{figure}
+
+\subsection{Terminal}
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \centering
+    \SmartFigure{figures/mode_resto.png}{\linewidth}
+    \caption{Terminal RESTO}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \centering
+    \SmartFigure{figures/mode_buvette.png}{\linewidth}
+    \caption{Terminal BUVETTE (scan + panier)}
+  \end{subfigure}
+
+  \vspace{10pt}
+  \begin{subfigure}{0.48\textwidth}
+    \centering
+    \SmartFigure{figures/voir_resltat.png}{\linewidth}
+    \caption{Résultat paiement RESTO}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \centering
+    \SmartFigure{figures/voir_resltat.png}{\linewidth}
+    \caption{Web Serial Monitor}
+  \end{subfigure}
+  \caption{Interfaces terminal et monitoring.}
+\end{figure}
+
+\section{Guide utilisateur (détaillé)}
+\subsection{Administrateur (préparation des données)}
+\begin{enumerate}
+  \item Se connecter : \url{http://localhost/UniSmartPay/web/admin/login.php}.
+  \item Créer un étudiant (ou vérifier l’étudiant démo).
+  \item Assigner une carte RFID (UID) à l’étudiant.
+  \begin{itemize}
+    \item Récupérer l’UID depuis le Serial Monitor (ou Web Serial) côté terminal.
+    \item Coller l’UID dans la page d’assignation et activer la carte.
+  \end{itemize}
+  \item Recharger le solde du compte (pour autoriser le débit RESTO/BUVETTE).
+  \item Ajouter des produits (mode BUVETTE) : nom, prix, et \textbf{code-barres} valide.
+  \item Vérifier l’historique : après paiement, contrôler la référence et les soldes avant/après.
+\end{enumerate}
+
+\subsection{Étudiant (utilisation)}
+\begin{enumerate}
+  \item Se connecter : \url{http://localhost/UniSmartPay/web/etudiant/login.php}.
+  \item Consulter le solde, la carte RFID, et l’historique des transactions.
+  \item Paiement RESTO : passer la carte sur le terminal pour débiter le ticket fixe.
+  \item Paiement BUVETTE : scanner les produits pour constituer le panier, puis payer par RFID.
+\end{enumerate}
+
+\subsection{Terminal (RESTO / BUVETTE) — pas à pas}
+\paragraph{RESTO (ticket fixe)}
+\begin{enumerate}
+  \item Mettre le terminal en mode \textbf{RESTO}.
+  \item Passer la carte RFID : lecture UID, vérification côté serveur, puis débit.
+  \item Résultat attendu : statut succès + écriture d’une transaction, feedback LED verte.
+\end{enumerate}
+
+\paragraph{BUVETTE (panier)}
+\begin{enumerate}
+  \item Mettre le terminal en mode \textbf{BUVETTE}.
+  \item Scanner les produits (code-barres) pour remplir le panier (quantité/prix).
+  \item Cliquer \textit{Payer} : une commande \texttt{PENDING} est créée.
+  \item Passer la carte RFID sur l’ESP32 : claim de la commande puis paiement.
+  \item Résultat attendu : commande \texttt{PAYE} et solde mis à jour.
+\end{enumerate}
+
+\paragraph{Mode dynamique (piloté depuis le site)}
+Le mode du terminal (RESTO/BUVETTE) peut être synchronisé par la page web (mise à jour BD), puis lu par l’ESP32 au moment du paiement (endpoints \texttt{terminal\_mode\_get.php} / \texttt{terminal\_mode\_set.php}).
+
+\section{Dépannage (problèmes fréquents)}
+\begin{itemize}
+  \item \textbf{Erreur MySQL} : vérifier que MySQL est démarré et que \texttt{DB\_PORT=3307} correspond à votre XAMPP.
+  \item \textbf{Connexion DB instable} : préférer \texttt{DB\_HOST=127.0.0.1} (évite certains problèmes de socket/IPv6).
+  \item \textbf{Caméra bloquée} : la webcam peut être bloquée en HTTP non sécurisé. Utiliser \url{http://localhost} ou activer HTTPS.
+  \item \textbf{Carte introuvable} : assigner l’UID à un étudiant via l’admin et vérifier le statut \texttt{active}.
+  \item \textbf{LED toujours allumée} : vérifier le câblage (GPIO→LED→GND) ou activer la logique \textit{active-low} dans le firmware.
+  \item \textbf{Timeout ESP32} : vérifier l’IP serveur (pas \texttt{localhost}), le WiFi, et l’accès Apache depuis le réseau.
+  \item \textbf{UID non reconnu} : vérifier le format (majuscules/minuscules, suppression des espaces) et l’enregistrement en base.
+\end{itemize}
+
+\end{document}
